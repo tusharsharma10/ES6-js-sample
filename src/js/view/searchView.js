@@ -5,15 +5,61 @@ export const getInput = () => elements.searchInput.val();
 
 //Functions to put stuff on html page
 // renderRecipe function will automatically get the argument
-export const renderResults = recipes => {
+export const renderResults = (recipes , page = 1 ,resPerPage = 10) => {
 
     //recipes.forEach(element => renderRecipe(element));
-
-    recipes.forEach(renderRecipe);
-
-
+    const start = ( page - 1 ) * resPerPage;
+    const end = page * resPerPage;
+    recipes.slice(start,end).forEach(renderRecipe);
+   
+    renderButtons(page,recipes.length,resPerPage);
 };
 
+/**
+ * Using data attributes to store the page number
+ * @param {*} page 
+ * @param {*} type 
+ */
+const createButton = (page,type) => {
+
+    const markup = ` <button class="btn-inline results__btn--${type}" data-goto=${type === 'prev' ? page - 1 : page + 1}>
+                        <svg class="search__icon">
+                            <use href="img/icons.svg#icon-triangle-${type === 'prev' ? 'left' : 'right'}"></use>
+                        </svg>
+                        <span>Page${type === 'prev' ? page - 1 : page + 1}</span>
+                    </button>  `
+                    
+                    // <button class="btn-inline results__btn--next">
+                    //     <span>Page 3</span>
+                    //     <svg class="search__icon">
+                    //         <use href="img/icons.svg#icon-triangle-right"></use>
+                    //     </svg>
+                    // </button>
+
+    return markup;
+};
+
+const renderButtons = (page,numResults,resPerPage) => {
+
+    const numofPages = Math.ceil(numResults/resPerPage);
+    let button;
+    if(page === 1 && numofPages > 1) {
+        // Only btn to go to next page
+        button = createButton(page,'next');
+    }
+    else if(page < numofPages){
+        button = `
+                ${createButton(page,'prev')}
+                ${createButton(page,'next')}
+        `;
+    }
+    else if(page === numofPages){
+        // Only btn to go to previous page
+        button =  createButton(page,'prev');
+    }
+
+    elements.searchResPages.append(button);
+};
 
 const renderRecipe = recipe => {
 
